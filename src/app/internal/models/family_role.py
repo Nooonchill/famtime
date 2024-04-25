@@ -4,7 +4,7 @@ from app.internal.models.family import Family
 from app.internal.models.app_user import AppUser
 
 
-class Role(models.Model):
+class FamilyRole(models.Model):
     USER_ROLE_IN_FAMILY = [
         ('User', 'User'),
         ('Admin', 'Admin'),

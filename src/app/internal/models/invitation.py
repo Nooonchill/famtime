@@ -9,5 +9,5 @@ class Invitation(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        time = self.created.strftime('%d.%m.%Y %H:%M')
+        time = self.created.strftime('%d.%m.%Y %H:%M %Z')
         return f"{self.family} ({time})"
