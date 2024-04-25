@@ -1,0 +1,13 @@
+from django.db import models
+
+from app.internal.models.family import Family
+
+
+class Invitation(models.Model):
+    family = models.ForeignKey(Family, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6, unique=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        time = self.created.strftime('%d.%m.%Y %H:%M')
+        return f"{self.family} ({time})"
