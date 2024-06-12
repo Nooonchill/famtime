@@ -46,7 +46,7 @@ h2 {
 }
 
 .logo {
-    font-size: 24px;
+    font-size: 48px;
     margin-bottom: 20px;
     color: #b5b5b5;
     background: linear-gradient(to right, rgb(88, 213, 252), rgb(185, 70, 255));
@@ -311,6 +311,7 @@ form button:hover {
     background-color: #1c1c1c;
     border-radius: 10px;
     overflow: hidden;
+    cursor: default;
 }
 
 .tasks th, .tasks td {
@@ -352,6 +353,7 @@ form button:hover {
     position: relative;
     height: 250px;
     width: 12%;
+    cursor: pointer;
 }
 
 .day::before {
@@ -454,10 +456,17 @@ form button:hover {
 
 .week-chooser p {
     font-size: 24px;
+    text-align: center;
+}
+
+.days {
+    margin-right: 0px;
+    width: 100px;
 }
 
 .choose-back, .choose-next {
     margin-left: 15px;
+    cursor: pointer;
 }
 
 .tasks {
@@ -596,8 +605,9 @@ form button:hover {
     background: linear-gradient(to right, rgb(88, 213, 252), rgb(185, 70, 255));
     -webkit-background-clip: text;
     color: transparent;
-    font-size: 24px;
+    font-size: 32px;
     margin-bottom: 20px;
+    cursor: default;
 }
 
 .notifications li {
@@ -614,6 +624,7 @@ form button:hover {
     display: flex;
     align-items: end;
     flex-wrap: wrap;
+    cursor: default;
 }
 
 .notification p {
@@ -815,4 +826,12 @@ form button:hover {
 ::-webkit-scrollbar-thumb {
     background: rgb(74, 66, 96);
     border-radius: 100px;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.taskrow {
+    cursor: pointer;
 }

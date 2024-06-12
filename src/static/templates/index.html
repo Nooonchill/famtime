@@ -13,7 +13,7 @@
         <div class="sidebar">
             <div class="logo">FamTime</div>
             <nav>
-                <a href="{% url 'index' %}" class="nav-item">Главная страница</a>
+                <a href="{% url 'index' %}" class="nav-item">Главная</a>
                 <a href="{% url 'schedule' %}" class="nav-item">Расписание</a>
                 <a href="{% url 'auth' %}" class="nav-item">Личный кабинет</a>
             </nav>
@@ -37,7 +37,7 @@
                         <div class="family-actions">
                             <div name="create_family" id="trigger">Создать</div>
                             <hr> 
-                            <div name="add_family" id="trigger_add">Присоединиться</div>
+                            <div class="clickable" name="add_family" id="trigger_add">Присоединиться</div>
                         </div>
                     </div>
                     <hr>
@@ -87,7 +87,7 @@
             </div>
             {% csrf_token %}
             {{ add_family_form }}
-            <input type="submit" name="add_family" value="Присоединиться">
+            <input class="clickable" type="submit" name="add_family" value="Присоединиться">
         </form>
     </div>
     <div id="popup" class="hidden">
@@ -137,6 +137,21 @@
             document.documentElement.style.setProperty('--sidebar-width', sidebarWidth);
         });
 
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const selectElement = document.getElementById('family');
+            const options = selectElement.options;
+            
+            if (options.length === 1) {
+                setCookie('family', options[0].value, 7);
+                selectElement.value = options[0].value;
+            } else {
+                var selectedOption = getCookie('family');
+                if (selectedOption) {
+                    selectElement.value = selectedOption;
+                }
+            }
+        });
+
         document.getElementById('family').addEventListener('change', function() {
             var selectedValue = this.value;
             setCookie('family', selectedValue, 7);
@@ -170,6 +185,7 @@
             }
             return null;
         }
+
         document.getElementById('generateHashButton').addEventListener('click', async function() {
             try {
                 const response = await fetch('/get-invitation/');
