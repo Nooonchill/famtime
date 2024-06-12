@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.2-bullseye
+    container_name: postgres
+    environment:
+      POSTGRES_USER: "post"
+      POSTGRES_PASSWORD: "post"
+      POSTGRES_DB: "post"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_post:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U post"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  api:
+    image: nooonchill/api:1
+    build: .
+    container_name: api
+    command: >
+      sh -c "python src/manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  bot:
+    image: nooonchill/bot:1
+    build: .
+    container_name: bot
+    command: >
+      sh -c "python src/manage.py runbot"
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - /etc/:/etc/
+  nginx:
+    image: nginx:1.24.0-bullseye
+    depends_on:
+      - api
+    ports:
+      - "81:80"
+    volumes:
+      - /etc/:/etc/
