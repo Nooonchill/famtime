@@ -3,7 +3,7 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE="config.settings"
 WORKDIR /app
 
-COPY pyproject.toml setup.cfg requirements.txt ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./.env ./.env

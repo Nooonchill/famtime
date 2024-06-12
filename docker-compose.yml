@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16.2-bullseye
-    container_name: postgres
+    container_name: postgres_fam
     environment:
       POSTGRES_USER: "post"
       POSTGRES_PASSWORD: "post"
@@ -18,9 +18,9 @@ services:
       timeout: 5s
       retries: 5
   api:
-    image: nooonchill/api:1
+    image: nooonchill/web:1.0
     build: .
-    container_name: api
+    container_name: web_fam
     command: >
       sh -c "python src/manage.py runserver 0.0.0.0:8000"
     ports:
@@ -28,19 +28,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-  bot:
-    image: nooonchill/bot:1
-    build: .
-    container_name: bot
-    command: >
-      sh -c "python src/manage.py runbot"
-    ports:
-      - "5001:5000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - /etc/:/etc/
   nginx:
     image: nginx:1.24.0-bullseye
     depends_on:
