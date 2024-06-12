@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from app.internal.models.family import Family
 
@@ -11,3 +12,7 @@ class Invitation(models.Model):
     def __str__(self):
         time = self.created.strftime('%d.%m.%Y %H:%M %Z')
         return f"{self.family} ({time})"
+
+    def update_created(self):
+        self.created = timezone.now()
+        self.save()

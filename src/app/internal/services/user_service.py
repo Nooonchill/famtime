@@ -24,8 +24,11 @@ def try_register_user(register_form: RegisterForm) -> AppUser | None:
             user = AppUser.objects.create(
                 username=username,
                 email=email,
-                password=password)
-        except IntegrityError:
+                password=password,
+                first_name=register_form.cleaned_data['first_name'],
+                last_name=register_form.cleaned_data['last_name'],
+            )
+        except:
             user = None
     else:
         raise ValidationError("repeat password error")
@@ -40,5 +43,4 @@ def try_log_in_user(log_in_form: LogInForm) -> AppUser | None:
         raise ValidationError("user not found")
     elif user.password != log_in_form.cleaned_data['password']:
         raise ValidationError("password error")
-    else:
-        raise ValidationError("Correct!")  # временно
+    return user

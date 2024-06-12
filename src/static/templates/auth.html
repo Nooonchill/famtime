@@ -1,18 +1,65 @@
 <!DOCTYPE html>
 {% load static %}
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamTime</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <form method="post">
-        {% csrf_token %}
-        {{ register_form }}
-        <input type="submit" value="Sign Up">
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        {{ log_in_form }}
-        <input type="submit" value="Log In">
-    </form>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">FamTime</div>
+            <nav>
+                <a href="{% url 'index' %}" class="nav-item">Главная страница</a>
+                <a href="{% url 'schedule' %}" class="nav-item">Расписание</a>
+                <a href="{% url 'auth' %}" class="nav-item">Личный кабинет</a>
+            </nav>
+        </div>
+        <div class="main-content">
+            <div class="login-register">
+                <div class="left-block">
+                    <h2 class="welcome-text">Организуй своё и семейное время в FamTime</h2>
+                </div>
+                <div class="right-block">
+                    <div class="form-header">
+                        <span class="form-title active" id="login-tab">Вход</span>
+                        <hr>
+                        <span class="form-title" id="register-tab">Регистрация</span>
+                    </div>
+                    <form id="login-form" method="post">
+                        {% csrf_token %}
+                        {{ log_in_form }}
+                        <div>
+                            <input type="submit" value="Log In">
+                        </div>
+                    </form>
+                    <form id="register-form" style="display: none;" method="post">
+                        {% csrf_token %}
+                        {{ register_form }}
+                        <div>
+                            <input type="submit" value="Sign Up">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('login-tab').addEventListener('click', function() {
+            document.getElementById('login-form').style.display = 'flex';
+            document.getElementById('register-form').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('register-tab').classList.remove('active');
+        });
+
+        document.getElementById('register-tab').addEventListener('click', function() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'flex';
+            this.classList.add('active');
+            document.getElementById('login-tab').classList.remove('active');
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamTime - Расписание</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">FamTime</div>
+            <nav>
+                <a href="{% url 'index' %}" class="nav-item">Главная страница</a>
+                <a href="{% url 'schedule' %}" class="nav-item">Расписание</a>
+                <a href="{% url 'auth' %}" class="nav-item">Личный кабинет</a>
+            </nav>
+        </div>
+        <div class="main-content schedule-content">
+            <div class="calendar">
+                <div class="week-chooser">
+                    <p class="month">Апрель</p>
+                    <p class="days">15-21</p>
+                    <p class="choose-back"><</p>
+                    <p class="choose-next">></p>
+                </div>
+                <div class="week">
+                    <!-- Эти элементы будут заполнены скриптом -->
+                </div>
+            </div>
+            <div class="schedule">
+                <div class="left-block">
+                    <div class="tasks active">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Задача</th>
+                                    <th>Начало</th>
+                                    <th>Конец</th>
+                                    <th>Участники</th>
+                                    <th>Тэг</th>
+                                    <th>Состояние</th>
+                                </tr>
+                            </thead>
+                            <tbody id="task-list">
+                                <!-- Задачи будут добавляться сюда скриптом -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="right-block">
+                    <h2>Задача</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ create_task_form }}
+                        <input type="submit" name="create_task" value="Создать задачу">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="task-popup" class="hidden">
+        <div class="popup-content">
+            <form id="edit-task-form" class="popup-form" method="post">
+                <div class="form-header">
+                    <h2 for="input">Редактировать задачу</h2>
+                    <span class="close-button">&times;</span>
+                </div>
+                {% csrf_token %}
+                <input type="hidden" name="task_id" id="task-id">
+                {{ update_task_form }}
+                <input type="submit" name="update_task" value="Сохранить изменения">
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentWeek = 0; // индекс текущей недели
+            const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+            function getWeekDates(startDate) {
+                const dates = [];
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
+                    dates.push({
+                        dayName: weekDays[date.getDay() === 0 ? 6 : date.getDay() - 1], // Понедельник - Воскресенье
+                        dayNum: date.getDate(),
+                        date: date.toISOString().split('T')[0] // ISO формат даты
+                    });
+                }
+                return dates;
+            }
+
+            function updateCalendar(weekOffset) {
+                const currentDate = new Date();
+                const startDate = new Date(currentDate.setDate(currentDate.getDate() + (weekOffset * 7)));
+                startDate.setDate(startDate.getDate() - startDate.getDay() + 1); // установить на понедельник текущей недели
+
+                const weekDates = getWeekDates(startDate);
+
+                document.querySelector('.week').innerHTML = ''; 
+
+                weekDates.forEach(dateInfo => {
+                    const dayElement = document.createElement('div');
+                    dayElement.classList.add('day');
+                    dayElement.setAttribute('data-date', dateInfo.date); 
+                    dayElement.innerHTML = `
+                        <div class="date">
+                            <p class="day-name">${dateInfo.dayName}</p>
+                            <p class="day-num">${dateInfo.dayNum}</p>
+                        </div>
+                        <div class="day-tags">
+                            <!-- Теги задач будут добавляться здесь -->
+                        </div>
+                    `;
+                    document.querySelector('.week').appendChild(dayElement);
+                    
+                    fetch(`/schedule/tags/${dateInfo.date}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const tagsContainer = dayElement.querySelector('.day-tags');
+                            let count = 0; 
+                            data.tag.forEach(tag => {
+                                if (count < 3) {
+                                    const tagElement = document.createElement('p');
+                                    tagElement.textContent = tag;
+                                    tagsContainer.appendChild(tagElement);
+
+                                    const hrElement = document.createElement('hr');
+                                    tagsContainer.appendChild(hrElement);
+                                    
+                                    count++;
+                                } else {
+                                    return;
+                                }
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при получении тегов:', error);
+                        });
+                });
+
+                
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                document.querySelector('.month').textContent = monthNames[startDate.getMonth()];
+                document.querySelector('.days').textContent = `${weekDates[0].dayNum} - ${weekDates[6].dayNum}`;
+
+                addDayClickHandlers(); 
+
+                
+                const selectedDate = localStorage.getItem('selectedDate');
+                if (selectedDate) {
+                    document.querySelectorAll('.day').forEach(function(day) {
+                        if (day.getAttribute('data-date') === selectedDate) {
+                            day.classList.add('active');
+                            day.click();
+                        }
+                    });
+                }
+            }
+
+            function formatDateTime(datetime) {
+                const [date, time] = datetime.split(' ');
+                const [year, month, day] = date.split('-');
+                return `${day}.${month}.${year} ${time}`;
+            }
+
+            function addDayClickHandlers() {
+                document.querySelectorAll('.day').forEach(function(day) {
+                    day.addEventListener('click', function() {
+                        const selectedDate = this.getAttribute('data-date');
+                        localStorage.setItem('selectedDate', selectedDate);
+
+                        fetch(`/schedule/tasks/${selectedDate}/`)
+                            .then(response => response.json())
+                            .then(tasks => {
+                                const taskList = document.getElementById('task-list');
+                                taskList.innerHTML = '';
+
+                                tasks.forEach(task => {
+                                    const taskRow = document.createElement('tr');
+                                    taskRow.className="taskrow";
+                                    taskRow.setAttribute('id', `task-${task.id}`);
+                                    taskRow.innerHTML = `
+                                        <td>${task.name}</td>
+                                        <td>${formatDateTime(task.start_time)}</td>
+                                        <td>${formatDateTime(task.end_time)}</td>
+                                        <td>${task.usernames}</td>
+                                        <td>${task.tag}</td>
+                                        <td>${task.status}</td>
+                                    `;
+                                    taskList.appendChild(taskRow);
+
+                                    
+                                    taskRow.addEventListener('click', function() {
+                                        openPopupForm(task);
+                                    });
+                                });
+                            });
+
+                        document.querySelectorAll('.day').forEach(function(day) {
+                            day.classList.remove('active');
+                        });
+
+                        this.classList.add('active');
+                    });
+                });
+            }
+
+            function openPopupForm(task) {
+                const popup = document.getElementById('task-popup');
+                const form = document.getElementById('edit-task-form');
+                popup.classList.remove('hidden');
+                console.log('remove')
+
+                form.elements['task_id'].value = task.id;
+                form.elements['name'].value = task.name;
+                form.elements['tag'].value = task.tag;
+                form.elements['start_time'].value = task.start_time;
+                form.elements['end_time'].value = task.end_time;
+                form.elements['description'].value = task.description;
+                form.elements['status'].value = task.status;
+                form.elements['private'].value = task.private;
+
+                
+                popup.style.display = 'flex';
+
+                document.querySelector('.close-button').addEventListener('click', function() {
+                    document.getElementById('task-popup').classList.add('hidden');
+                });
+            }
+
+            document.querySelector('.choose-back').addEventListener('click', function() {
+                currentWeek--;
+                updateCalendar(currentWeek);
+            });
+
+            document.querySelector('.choose-next').addEventListener('click', function() {
+                currentWeek++;
+                updateCalendar(currentWeek);
+            });
+
+            updateCalendar(currentWeek);
+        });
+
+    </script>        
+</body>
+</html>

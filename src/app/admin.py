@@ -6,6 +6,7 @@ from app.internal.models.family_role import FamilyRole
 from app.internal.models.invitation import Invitation
 from app.internal.models.task import Task
 from app.internal.models.notification import Notification
+from app.internal.models.task_role import TaskRole
 
 admin.site.site_title = "famtime"
 admin.site.site_header = "famtime"
@@ -16,3 +17,4 @@ admin.site.register(FamilyRole)
 admin.site.register(Invitation)
 admin.site.register(Task)
 admin.site.register(Notification)
+admin.site.register(TaskRole)
